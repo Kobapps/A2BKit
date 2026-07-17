@@ -40,10 +40,13 @@ namespace A2BKit.Editor
         private static readonly Vector3[] Samples = new Vector3[SampleCount];
         private static readonly List<A2BVisualState> PreviewItems = new List<A2BVisualState>(64);
 
-        private static readonly Color PathColor = new Color(0.35f, 0.85f, 1f, 0.9f);
-        private static readonly Color OriginColor = new Color(0.4f, 1f, 0.5f, 1f);
-        private static readonly Color DestinationColor = new Color(1f, 0.45f, 0.75f, 1f);
-        private static readonly Color WarningColor = new Color(1f, 0.7f, 0.2f, 1f);
+        // Internal so the A2B Effect Editor window's own scene overlay draws from the same palette —
+        // the window has no selected player, so it cannot go through the DrawGizmo path and must draw
+        // itself, but it should not invent a second, subtly-different set of colours.
+        internal static readonly Color PathColor = new Color(0.35f, 0.85f, 1f, 0.9f);
+        internal static readonly Color OriginColor = new Color(0.4f, 1f, 0.5f, 1f);
+        internal static readonly Color DestinationColor = new Color(1f, 0.45f, 0.75f, 1f);
+        internal static readonly Color WarningColor = new Color(1f, 0.7f, 0.2f, 1f);
 
         /// <summary>
         /// Fills and returns the shared sample buffer by walking t across [0,1] through the path's

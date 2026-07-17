@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace A2BKit.Core
@@ -9,6 +10,101 @@ namespace A2BKit.Core
     {
         public Vector3 Evaluate(in A2BPathContext ctx, float t)
             => Vector3.LerpUnclamped(ctx.Origin, ctx.Destination, t);
+    }
+
+    /// <summary>
+    /// One intermediate Bézier control point for <see cref="A2BSplinePath"/>.
+    ///
+    /// Stored relative to the chord, never in absolute units: <see cref="Along"/> slides it between the
+    /// endpoints and <see cref="Offset"/> pushes it off the chord in MULTIPLES OF THE CHORD LENGTH. That
+    /// is the property that makes one authored curve read the same in world space (metres) and on a
+    /// Canvas (pixels) — the arc is a fraction of the distance, so it scales with the effect instead of
+    /// vanishing to a two-pixel wobble the way an absolute height does.
+    /// </summary>
+    [Serializable]
+    public sealed class A2BSplineControlPoint
+    {
+        [Tooltip("Position between the endpoints, 0 = origin, 1 = destination.")]
+        [Range(0f, 1f)] public float Along = 0.5f;
+
+        [Tooltip("Offset off the chord, in multiples of the straight-line distance. (0, 0.5, 0) bulges " +
+                 "half the endpoint distance upward, in any space.")]
+        public Vector3 Offset = new Vector3(0f, 0.5f, 0f);
+
+        public A2BSplineControlPoint() { }
+
+        public A2BSplineControlPoint(float along, Vector3 offset)
+        {
+            Along = along;
+            Offset = offset;
+        }
+    }
+
+    /// <summary>
+    /// A Bézier curve of ANY number of control points (FR-9/FR-10) — the multi-point peer of
+    /// <see cref="A2BBezierPath"/>. Add points to sculpt an S-curve, a loop-round, a double-hump; the
+    /// editor gives each one a Scene handle.
+    ///
+    /// The curve is the Bézier over [origin, control points…, destination], evaluated with De Casteljau,
+    /// so B(0)==origin and B(1)==destination hold exactly no matter how the middle is shaped (AD-13).
+    /// Control offsets are fractions of the chord (see <see cref="A2BSplineControlPoint"/>), so the shape
+    /// is space-independent — the same asset arcs visibly whether it plays in metres or pixels.
+    ///
+    /// Pure and allocation-free on the tick path (AD-3): the De Casteljau scratch is a reused buffer,
+    /// grown only when the control-point COUNT changes (an authoring action), never per evaluation.
+    /// </summary>
+    [Serializable]
+    public sealed class A2BSplinePath : IA2BPath
+    {
+        [Tooltip("Intermediate Bézier control points. The curve still starts at the origin and ends at " +
+                 "the destination; these bend the path between them. Add or drag them in the Scene view.")]
+        public List<A2BSplineControlPoint> ControlPoints = new List<A2BSplineControlPoint>
+        {
+            new A2BSplineControlPoint(0.5f, new Vector3(0f, 0.5f, 0f))
+        };
+
+        [Tooltip("Per-item random variation applied to the control offsets, as a fraction. 0 = every " +
+                 "item follows the identical curve.")]
+        [Range(0f, 1f)] public float Jitter = 0f;
+
+        // Reused De Casteljau workspace. NonSerialized: it is runtime scratch, not authored state, and
+        // paths are shared by reference across items/effects — safe because the tick is single-threaded
+        // and each Evaluate uses the buffer only within its own call (AD-3).
+        [NonSerialized] private Vector3[] _work;
+
+        public Vector3 Evaluate(in A2BPathContext ctx, float t)
+        {
+            int cpCount = ControlPoints?.Count ?? 0;
+            int n = cpCount + 2;
+
+            if (_work == null || _work.Length < n) _work = new Vector3[n];
+
+            Vector3 origin = ctx.Origin;
+            Vector3 destination = ctx.Destination;
+            float len = Vector3.Distance(origin, destination);
+
+            _work[0] = origin;
+            _work[n - 1] = destination;
+
+            var rng = new A2BRandom(ctx.Seed);
+            for (int i = 0; i < cpCount; i++)
+            {
+                A2BSplineControlPoint cp = ControlPoints[i];
+                Vector3 off = cp.Offset;
+                // Same item seed drives the same jitter every frame, so an item holds its curve (AD-10).
+                if (Jitter > 0f) off *= 1f + rng.NextFloat(-Jitter, Jitter);
+                _work[i + 1] = Vector3.LerpUnclamped(origin, destination, cp.Along) + off * len;
+            }
+
+            // In-place De Casteljau. At t=0 every lerp keeps the left point, so the result is _work[0]
+            // == origin; at t=1 it walks to _work[n-1] == destination. The endpoint invariant is
+            // therefore structural, not something the control points can break (AD-13).
+            for (int k = 1; k < n; k++)
+                for (int i = 0; i < n - k; i++)
+                    _work[i] = Vector3.LerpUnclamped(_work[i], _work[i + 1], t);
+
+            return _work[0];
+        }
     }
 
     /// <summary>

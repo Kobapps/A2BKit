@@ -31,6 +31,13 @@ namespace A2BKit.Unity
                 return existing;
 
             var go = new GameObject("[A2BKit Canvas]", typeof(RectTransform), typeof(Canvas));
+
+            // DontSave for the same reason every other A2BKit-created root carries it: at runtime it is
+            // harmless, and in an edit-mode preview (FR-21) it keeps this scaffolding out of the user's
+            // scene file. Without it, an editor tool that builds a Canvas adapter would leave a stray
+            // "[A2BKit Canvas]" behind to be saved.
+            go.hideFlags = HideFlags.DontSave;
+
             var rect = (RectTransform)go.transform;
             var canvas = go.GetComponent<Canvas>();
 

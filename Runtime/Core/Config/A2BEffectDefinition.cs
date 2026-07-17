@@ -45,8 +45,26 @@ namespace A2BKit.Core
         public IA2BEmission Emission = new A2BBurstEmission();
 
         [Header("Appearance")]
-        [Tooltip("Item scale over normalized progress. Lets items pop in and shrink on arrival.")]
+        [Tooltip("Scale over the duration: item scale across normalized progress (0 = spawn, 1 = arrival). " +
+                 "Lets items pop in and shrink on landing.")]
         public AnimationCurve ScaleOverProgress = AnimationCurve.Constant(0f, 1f, 1f);
+
+        [Tooltip("Also drive scale from the motion path's DEPTH (Z): the Z the path pushes an item to, as " +
+                 "a fraction of the endpoint distance, becomes extra scale, multiplied onto the curve " +
+                 "above. Sculpt scale with the same path handles — raise a control point's Z. On a " +
+                 "2D/Canvas effect Z moves nothing visible, so this repurposes it; the item scales " +
+                 "rather than drifting in depth.")]
+        public bool ScaleFromPathDepth = false;
+
+        [Tooltip("How strongly the path's Z depth scales the item. 1 = a Z of one endpoint-distance " +
+                 "doubles the size; negative shrinks with depth.")]
+        public float PathDepthScaleStrength = 1f;
+
+        [Tooltip("Extra scale added in proportion to how far an item bulges off the straight line — an " +
+                 "arced item grows near the peak and settles as it lands, so the arc reads as depth (a " +
+                 "coin popping up toward the camera). 0 = off. Especially useful on a flat Canvas, where " +
+                 "there is no real perspective; works in any space.")]
+        [Min(0f)] public float ArcLiftScale = 0f;
 
         [Tooltip("Item tint over normalized progress. Alpha here drives fades.")]
         public Gradient ColorOverProgress = CreateDefaultGradient();
@@ -105,6 +123,28 @@ namespace A2BKit.Core
             if (DurationJitter <= 0f) return Duration;
             var rng = new A2BRandom(A2BRandom.DeriveSeed(effectSeed ^ 0x5A5A5A5Au, itemIndex));
             return Mathf.Max(0.01f, Duration * (1f + rng.NextFloat(-DurationJitter, DurationJitter)));
+        }
+
+        /// <summary>
+        /// Total simulated seconds from Play until the LAST item completes, for a given seed — the
+        /// max over items of (its release delay + its duration).
+        ///
+        /// This is what the editor timeline maps its scrub bar to: a burst with stagger and duration
+        /// jitter finishes later than <see cref="Duration"/>, and a scrub bar that ended at Duration
+        /// would cut the tail off. Deterministic per seed, like everything downstream of it (AD-10).
+        /// </summary>
+        public float ResolveSpan(uint effectSeed)
+        {
+            if (Emission == null) return Duration;
+
+            int count = Mathf.Max(1, Emission.ResolveItemCount(effectSeed));
+            float span = 0f;
+            for (int i = 0; i < count; i++)
+            {
+                float end = Emission.ResolveDelay(effectSeed, i, count) + ResolveItemDuration(effectSeed, i);
+                if (end > span) span = end;
+            }
+            return span;
         }
 
         private static Gradient CreateDefaultGradient()

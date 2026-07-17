@@ -261,7 +261,40 @@ namespace A2BKit.Core
                 var ctx = new A2BPathContext(scatteredOrigin, destWorking, i, slot.ItemCount, item.Seed);
                 Vector3 position = def.Path.Evaluate(in ctx, eased);
 
-                Vector3 scale = Vector3.one * (def.ScaleOverProgress?.Evaluate(t) ?? 1f);
+                Vector3 chord = destWorking - scatteredOrigin;
+                float chordLen = chord.magnitude;
+
+                // Base scale is the "scale over the duration" curve.
+                float scaleFactor = def.ScaleOverProgress?.Evaluate(t) ?? 1f;
+
+                // Path-depth scale: read the DEPTH (Z) the path pushes the item to — as a fraction of the
+                // endpoint distance — and fold it into scale. This lets a designer sculpt scale with the
+                // same path handles: on a 2D/Canvas effect Z moves nothing visible, so the curve's Z
+                // channel is free to mean "how big". The Z displacement is then removed from the position
+                // so the item scales rather than drifting in depth (composes with the curve above).
+                if (def.ScaleFromPathDepth && chordLen > 1e-4f)
+                {
+                    float straightZ = Mathf.LerpUnclamped(scatteredOrigin.z, destWorking.z, eased);
+                    float zFrac = (position.z - straightZ) / chordLen;
+                    scaleFactor *= Mathf.Max(0f, 1f + def.PathDepthScaleStrength * zFrac);
+                    position.z = straightZ;
+                }
+
+                // Arc-lift: grow the item by how far it bulges off the chord, as a fraction of the chord
+                // length so it reads the same in pixels or metres. This is what sells an arc as depth on
+                // a flat Canvas. Off by default (factor 0), and a straight path adds nothing since the
+                // perpendicular distance is zero.
+                if (def.ArcLiftScale > 0f && chordLen > 1e-4f)
+                {
+                    float chordSqr = chordLen * chordLen;
+                    Vector3 fromOrigin = position - scatteredOrigin;
+                    float along = Vector3.Dot(fromOrigin, chord) / chordSqr;
+                    Vector3 perp = fromOrigin - chord * along;
+                    float perpFrac = perp.magnitude / chordLen;
+                    scaleFactor *= 1f + def.ArcLiftScale * perpFrac;
+                }
+
+                Vector3 scale = Vector3.one * scaleFactor;
                 Color color = def.ColorOverProgress?.Evaluate(t) ?? Color.white;
 
                 Quaternion rotation = Quaternion.identity;

@@ -2,6 +2,75 @@
 
 All notable changes to A2BKit are documented here.
 
+## [0.2.0] — 2026-07-18
+
+### Added
+
+- **`A2BSplinePath` — a multi-point Bézier path.** The multi-point peer of `A2BBezierPath`: add any
+  number of control points to sculpt an S-curve, a loop-round, a double-hump. It's a Bézier over
+  [origin, control points…, destination] (De Casteljau), so it still lands exactly on both endpoints no
+  matter how the middle is shaped. Control offsets are stored as **fractions of the endpoint distance**,
+  so one authored curve reads the same in world space (metres) and on a Canvas (pixels) — the arc no
+  longer collapses to an invisible few-pixel wobble in canvas space. Allocation-free on the tick path.
+- **Scene handles for the spline path.** In the A2B Effect Editor, each control point gets a draggable
+  handle; a **+** on every segment inserts a point there and a **−** beside each removes it (both
+  Undo-able). Dragging decomposes back to (position-along, offset) exactly.
+- **Arc-lift scaling (`ArcLiftScale`).** Items grow in proportion to how far they bulge off the straight
+  line, so an arc reads as depth — a coin popping up toward the camera and settling as it lands.
+  Especially useful on a flat Canvas, where there's no real perspective; works in any space; off (0) by
+  default.
+- **Burst-area gizmo.** The A2B Effect Editor now draws the burst footprint at the origin — the spawn
+  **scatter** radius (where items are born) and, for a burst-gather path, the **burst** radius (how far
+  they spray before turning for the target). Each is an editable radius handle: drag the ring to resize
+  (Undo-able), so you can size the spread visually instead of guessing pixel values.
+- **Burst release easing (`A2BBurstEmission.ReleaseEasing`).** Shapes *when* items release across
+  `SpreadOverDuration` instead of an even trickle — ease-out front-loads the spray, ease-in-out softens
+  both ends. Any `IA2BEasing` (the 21 built-ins or an AnimationCurve); null keeps the linear spread.
+- **Scale from the motion path's depth (`ScaleFromPathDepth`).** Beside "scale over the duration"
+  (`ScaleOverProgress`, an animation curve), you can now drive scale from the path's **Z**: the depth the
+  path pushes an item to, as a fraction of the endpoint distance, multiplies its scale. On a 2D/Canvas
+  effect Z moves nothing visible, so the curve's Z channel is free to mean "how big" — sculpt scale with
+  the same spline handles by raising a control point's Z. The item scales rather than drifting in depth,
+  and it composes with the duration curve and arc-lift. Strength via `PathDepthScaleStrength`.
+
+- **A2B Effect Editor window** (`Tools ▸ A2BKit ▸ A2B Effect Editor`). A visual, in-scene editor for a
+  single effect asset, without entering play mode:
+  - **Preview and scrub the timeline.** Play, pause, restart, loop, and vary speed — or drag the Time
+    slider to any point in the effect and hold there. Both playback and scrubbing run the *real*
+    scheduler on the injected editor clock (the same seam the tests drive), so what you see is the
+    frame the game would show. Scrubbing re-simulates from zero to the chosen time, because the
+    scheduler is forward-only. The scrub bar spans the true end-to-end length — stagger and duration
+    jitter included — not just `Duration`.
+  - **Real payload visuals in the Scene AND Game view — no play mode.** "Show payload visuals" (on by
+    default) draws the actual sprite / image / mesh / text flying, in both views, by running the
+    shipping presenter (space adapter + pooled renderer + feedbacks) on a self-owned `DontSave` stage
+    that is torn down whole on every exit. Turn it off to fall back to lightweight motion dots (the
+    Scene-only overlay). An effect with no payload falls back to dots automatically. Specifically:
+    - **Canvas effects preview on a real screen overlay**, with endpoints resolved the way the runtime
+      does — a RectTransform target reports its true screen position (via its canvas scaler) instead of
+      being re-projected as a world point, which is what previously threw canvas items thousands of
+      pixels off-screen. Virtual points on a canvas effect are treated as screen positions.
+    - **The Game view refreshes during preview.** It does not re-render on its own in edit mode, so the
+      preview now requests it each frame; without this the items were placed correctly but the Game view
+      showed a stale frame.
+    - **Particle payloads actually emit in the preview.** Particle systems do not simulate in edit mode,
+      so the preview steps each active system with the clock — a burst is visible without play mode.
+  - **Path and live items drawn in the Scene view** with no `A2BEffectPlayer` present, reusing the
+    gizmo's own sampler and palette so the two never diverge.
+  - **Drag the arc in the Scene.** A Bezier path gets a control-point handle: drag it and `ArcHeight`,
+    `ArcDirection` and `ArcBias` update together while the arc bulges to follow (Undo-able). Shapes
+    whose form is per-item and seed-driven (procedural spiral, burst spray) are left to the inspector
+    rather than given a handle that would misrepresent where the curve goes.
+  - **Endpoints as scene objects or virtual points.** Pick a Transform (or "Use Selection"), or switch
+    an endpoint to a virtual point and drag it with a Scene handle — so an effect can be tuned before
+    the objects it fires between exist. Endpoints resolve live, so moving either updates the preview.
+  - **Embedded definition editing** — the full effect inspector, inline; edits show immediately, and a
+    held scrub frame re-simulates so a tweak is visible without touching Play.
+- **`A2BEffectDefinition.ResolveSpan(seed)`** (Core) — the effect's total end-to-end length for a seed,
+  which the editor timeline maps its scrub bar onto. Guarded by `A2BEffectSpanTests`.
+- **Scrub / pause / speed on `A2BEffectPreview`** (`Begin`, `Scrub`, `SetPaused`, `Speed`, `Span`,
+  `Paused`) — the preview engine now supports holding and seeking a frame, not only free-running.
+
 ## [0.1.2] — 2026-07-17
 
 ### Added

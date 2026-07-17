@@ -45,6 +45,22 @@ namespace A2BKit.Tests.EditMode
                 { "Procedural.Default", new A2BProceduralPath() },
                 { "Procedural.HighFrequency", new A2BProceduralPath { Amplitude = 1000f, Frequency = 500f, PhaseJitter = 1f, SpiralByItem = true } },
                 { "Procedural.NoJitter", new A2BProceduralPath { Amplitude = 25f, Frequency = 0f, PhaseJitter = 0f, SpiralByItem = false } },
+                // Spline: default one point, an empty list (must degrade to a straight line), many
+                // points, and heavy jitter — all must still land on both endpoints (De Casteljau makes
+                // this structural) and stay pure despite the reused scratch buffer.
+                { "Spline.Default", new A2BSplinePath() },
+                { "Spline.Empty", new A2BSplinePath { ControlPoints = new List<A2BSplineControlPoint>() } },
+                { "Spline.Many", new A2BSplinePath { ControlPoints = new List<A2BSplineControlPoint>
+                    {
+                        new A2BSplineControlPoint(0.2f, new Vector3(0f, 0.6f, 0f)),
+                        new A2BSplineControlPoint(0.4f, new Vector3(0.3f, -0.4f, 0.2f)),
+                        new A2BSplineControlPoint(0.6f, new Vector3(-0.5f, 0.5f, 0f)),
+                        new A2BSplineControlPoint(0.85f, new Vector3(0f, -0.3f, -0.4f)),
+                    } } },
+                { "Spline.HeavyJitter", new A2BSplinePath { Jitter = 1f, ControlPoints = new List<A2BSplineControlPoint>
+                    {
+                        new A2BSplineControlPoint(0.5f, new Vector3(0f, 2000f, 0f)),
+                    } } },
             };
 
             int contextIndex = 0;

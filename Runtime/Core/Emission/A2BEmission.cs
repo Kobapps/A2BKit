@@ -42,6 +42,11 @@ namespace A2BKit.Core
         [Tooltip("Total seconds over which all items are released when ReleaseMode is SpreadOverDuration.")]
         [Min(0f)] public float SpreadDuration = 0.4f;
 
+        [SerializeReference, A2BSubclassSelector, Tooltip("Shapes WHEN items release across " +
+            "SpreadOverDuration, instead of an even trickle. Ease-out front-loads the burst (a spray that " +
+            "fires fast then tails off); ease-in-out eases it in and out for a softer feel. Null = linear.")]
+        public IA2BEasing ReleaseEasing;
+
         [Tooltip("Extra random delay added per item, in seconds.")]
         [Min(0f)] public float DelayJitter = 0f;
 
@@ -85,8 +90,15 @@ namespace A2BKit.Core
                     baseDelay = 0f;
                     break;
                 case A2BReleaseMode.SpreadOverDuration:
-                    baseDelay = itemCount <= 1 ? 0f : (itemIndex / (float)(itemCount - 1)) * SpreadDuration;
+                {
+                    // Normalized release position, optionally reshaped by an easing so the burst can
+                    // front-load or soften instead of trickling out evenly. Evaluated at the raw
+                    // fraction — the easing decides *when*, not the fraction's own spacing.
+                    float f = itemCount <= 1 ? 0f : itemIndex / (float)(itemCount - 1);
+                    if (ReleaseEasing != null) f = ReleaseEasing.Evaluate(f);
+                    baseDelay = f * SpreadDuration;
                     break;
+                }
                 default:
                     baseDelay = itemIndex * StaggerInterval;
                     break;
