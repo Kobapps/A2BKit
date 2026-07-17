@@ -1,0 +1,19 @@
+{
+  "name": "A2BKitDemo",
+  "rootNamespace": "A2BKit.Demo",
+  "references": [
+    "A2BKit.Core",
+    "A2BKit.Unity",
+    "UniTask",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

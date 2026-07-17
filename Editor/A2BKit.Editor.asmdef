@@ -1,0 +1,21 @@
+{
+  "name": "A2BKit.Editor",
+  "rootNamespace": "A2BKit.Editor",
+  "references": [
+    "A2BKit.Core",
+    "A2BKit.Unity",
+    "UniTask",
+    "Unity.TextMeshPro"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

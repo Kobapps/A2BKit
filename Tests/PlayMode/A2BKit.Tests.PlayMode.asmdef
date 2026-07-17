@@ -1,0 +1,25 @@
+{
+  "name": "A2BKit.Tests.PlayMode",
+  "rootNamespace": "A2BKit.Tests.PlayMode",
+  "references": [
+    "A2BKit.Core",
+    "A2BKit.Unity",
+    "UniTask",
+    "Unity.TextMeshPro",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

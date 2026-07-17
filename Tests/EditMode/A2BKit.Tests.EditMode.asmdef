@@ -1,0 +1,26 @@
+{
+  "name": "A2BKit.Tests.EditMode",
+  "rootNamespace": "A2BKit.Tests.EditMode",
+  "references": [
+    "A2BKit.Core",
+    "A2BKit.Unity",
+    "UniTask",
+    "UnityEngine.TestRunner",
+    "UnityEditor.TestRunner"
+  ],
+  "includePlatforms": [
+    "Editor"
+  ],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": true,
+  "precompiledReferences": [
+    "nunit.framework.dll"
+  ],
+  "autoReferenced": false,
+  "defineConstraints": [
+    "UNITY_INCLUDE_TESTS"
+  ],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

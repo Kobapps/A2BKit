@@ -1,0 +1,38 @@
+{
+  "name": "com.kobapps.a2bkit",
+  "version": "0.1.0",
+  "displayName": "A2BKit",
+  "description": "A-to-B reward and feedback effects: coins flying to a wallet HUD, floating score text, XP orbs. One configuration model across 2D, 3D and Canvas space, with zero per-frame allocation, live endpoint tracking, trails and on-hit impacts, UniTask async, and a first-class FirstItemArrived hook so the counter starts when the first coin actually lands.",
+  "unity": "6000.0",
+  "keywords": [
+    "effects",
+    "reward",
+    "juice",
+    "ui",
+    "coins",
+    "pooling",
+    "unitask"
+  ],
+  "author": {
+    "name": "Kobapps",
+    "url": "https://github.com/Kobapps"
+  },
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/Kobapps/A2BKit.git"
+  },
+  "documentationUrl": "https://github.com/Kobapps/A2BKit#readme",
+  "changelogUrl": "https://github.com/Kobapps/A2BKit/blob/main/CHANGELOG.md",
+  "licensesUrl": "https://github.com/Kobapps/A2BKit/blob/main/LICENSE.md",
+  "dependencies": {
+    "com.unity.ugui": "2.0.0"
+  },
+  "samples": [
+    {
+      "displayName": "A2BKit Examples",
+      "description": "Eight scenes: coin to wallet, coin burst to wallet, floating score text, XP orbs, 3D mesh collect, particle burst, moving target, and cross-space.",
+      "path": "Samples~/Examples"
+    }
+  ]
+}
