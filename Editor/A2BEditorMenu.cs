@@ -61,5 +61,12 @@ namespace A2BKit.Editor
 
         [MenuItem("Tools/A2BKit/Stop Effect Preview", true)]
         private static bool ValidateStopEffectPreview() => A2BEffectPreview.IsPlaying;
+
+        /// <summary>
+        /// Installs the AI skill (see <see cref="A2BSkillInstaller"/>). Also a button in the window;
+        /// the menu item is here so it is findable without opening the window first.
+        /// </summary>
+        [MenuItem("Tools/A2BKit/Install AI Skill", false, 40)]
+        private static void InstallSkill() => A2BSkillInstaller.Install();
     }
 }

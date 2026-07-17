@@ -26,9 +26,14 @@ First release.
 - **Async.** `await A2B.PlayAsync(...)` via UniTask, with cancellation.
 - **Live endpoints.** Origin and destination resolve every frame, so a moving wallet is the default
   case rather than an edge case. A destroyed endpoint cancels cleanly instead of throwing.
-- **Editor tooling.** Context-aware inspectors, a Scene-view gizmo that draws the *real* path (it calls
-  the same `Evaluate` the runtime does), an in-editor preview driven by the same injected clock the
-  tests use, and a runtime debug overlay reporting active effects and pool occupancy.
+- **Editor tooling.** An **A2BKit window** (`Tools ▸ A2BKit ▸ A2BKit Window`) with live runtime
+  diagnostics (active effects, items in flight, pool occupancy), the common tools, and a one-click
+  installer for the AI skill. Plus context-aware inspectors, a Scene-view gizmo that draws the *real*
+  path (it calls the same `Evaluate` the runtime does), an in-editor preview driven by the same
+  injected clock the tests use, and a runtime debug overlay.
+- **AI skill.** A `SKILL.md` teaching the API, patterns, performance rules and gotchas, installable
+  into `.claude/skills/a2bkit/` from the window (or `Tools ▸ A2BKit ▸ Install AI Skill`) so an AI
+  assistant working in the project uses the real API rather than guessing.
 - **Extensibility.** Paths, easings, emissions, payloads and feedbacks are `[SerializeReference]` fields
   — the inspector's picker finds your implementation automatically, no registration. Space adapters
   install through `A2BAdapters` (per-asset or global), because `Space` is an enum and cannot be

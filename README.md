@@ -175,9 +175,20 @@ That invariant is not pedantry: arrival is defined as `t >= 1`, so a path that m
 - **Canvas items get their own canvas by default.** Any drawable change re-runs batch building for every element on that canvas, so 200 moving coins on your HUD canvas makes the *rebuild* the frame spike. Override via `A2BEffectPlayer.CanvasRoot` if you have profiled the other way.
 - **Time is injected.** Tests and the editor preview drive the same `IA2BTimeSource` seam the runtime does, which is why preview cannot drift from real behavior.
 
-## Debugging
+## The A2BKit window
 
-Press **F3** (or `Tools > A2BKit > Debug Overlay`) for live active-effect, in-flight-item and pool counts. The overlay itself does not allocate per frame — a diagnostic that violated the package's own headline constraint while displaying its numbers would be self-refuting.
+`Tools ▸ A2BKit ▸ A2BKit Window` is the front door: live runtime counts (active effects, items in
+flight, pool occupancy), one-click **Create Effect Asset**, a toggle for the in-game overlay, and the
+**Install AI Skill** button. In-game, press **F3** for the same counts as an overlay — which itself
+does not allocate per frame, because a diagnostic that broke the package's headline constraint while
+displaying its numbers would be self-refuting.
+
+## AI skill
+
+A2BKit ships a skill that teaches an AI assistant its API, patterns, performance rules and gotchas.
+Click **Install AI Skill** in the window (or `Tools ▸ A2BKit ▸ Install AI Skill`) and it copies into
+`.claude/skills/a2bkit/`, so Claude Code working in your project writes against the real API instead
+of guessing. The skill ships in the package, so it stays matched to the version you have installed.
 
 ## Not in scope
 
@@ -185,4 +196,5 @@ Not a tweening library, not an economy system (A2BKit animates the reward; your 
 
 ## Docs
 
-Planning artifacts live in `_bmad-output/planning-artifacts/`: the PRD (`prds/`) defines the 28 FRs, and the architecture spine (`architecture/`) carries the 20 ADs an implementer must not violate.
+`Documentation~/` holds the full design record: the brief, the PRD (28 FRs), the architecture spine
+(the ADs an implementer must not violate), the extending guide, and the AI skill.
