@@ -1,6 +1,6 @@
 # A2BKit Examples
 
-Eight scenes. Open one, press Play.
+Nine scenes. Open one, press Play.
 
 Install them through **Package Manager → A2BKit → Samples → A2BKit Examples → Import**, then open a
 scene from `Assets/Samples/A2BKit/<version>/A2BKit Examples/Scenes/`.
@@ -18,6 +18,7 @@ The only scripts here are small reactions you wire up yourself:
 | --- | --- | --- |
 | `A2BDemoAutoPlay` | — | Fires the player on a timer, so a scene is watchable with no input |
 | `A2BDemoClickToPlay` | — (or a Button's `onClick`) | Fires the player when you click a target rect. No EventSystem needed — it hit-tests the pointer directly and reads whichever input backend is active |
+| `A2BDemoMultiPlay` | — | Fires several players at once on a timer, so one reward can send coins and xp to different places at the same time |
 | `A2BDemoCounter` | `OnFirstItemArrivedEvent` → `BeginRollUp`, `OnItemArrivedEvent` → `Increment` | The wallet number |
 | `A2BDemoPunch` | `OnItemArrivedEvent` → `Punch` | Kicks the wallet icon on each landing |
 | `A2BDemoXpBar` | `OnItemArrivedEvent` → `AddXp` | Fills a bar from arrivals |
@@ -35,6 +36,7 @@ The only scripts here are small reactions you wire up yourself:
 | 6 | Particle Burst | Each item is a pooled `ParticleSystem`. It is still a CPU-side Transform, which is why `ItemArrived` still fires — GPU particles could not tell you when anything landed. |
 | 7 | Moving Target | The wallet slides across the screen **while coins are in flight**, and they still land on it. The only code doing that is `A2BDemoOscillate`: endpoints resolve every frame and are never cached at play time. |
 | 8 | Cross Space | A 3D chest, a UI wallet. Origin is a plain world Transform; the effect plays in Canvas space and the adapter projects it. No camera math at the call site. |
+| 9 | Multiple Effects | **Two effects at once, to different places.** One reward sends coins to the wallet HUD *and* xp orbs to the level bar. They run concurrently and never disturb each other — one scheduler advances every effect, and each has its own pool. Guarded by `A2BConcurrentEffectsTests`. |
 
 ## The art
 

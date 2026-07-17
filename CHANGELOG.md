@@ -2,7 +2,23 @@
 
 All notable changes to A2BKit are documented here.
 
-## [0.1.1] — 2026-07-17
+## [0.1.2] — 2026-07-17
+
+### Added
+
+- **Multiple Effects sample (scene 9).** One reward fires two effects at once, to different places —
+  coins to the wallet HUD and xp orbs to the level bar. They run concurrently and never interfere.
+- **`A2BDemoMultiPlay`** (samples) — fires several `A2BEffectPlayer`s together.
+- **`A2BConcurrentEffectsTests`** — permanent guards that playing a new effect while one is running
+  never reuses or disturbs the running one's pooled items, even under rapid overlapping replays.
+
+### Fixed
+
+- **Floating Score Text: rapid clicks no longer jostle popups already in flight.** The float
+  destination was parented to the star, which is scale-punched on each click; since endpoints resolve
+  every frame, punching moved the destination and yanked in-flight popups. The destination now hangs
+  off the canvas, independent of the punch. (This was a sample-scene wiring issue — the effect pool
+  itself was never at fault, which the new concurrency tests confirm.)
 
 ### Changed
 

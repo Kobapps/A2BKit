@@ -14,21 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: A2BKit.Unity::A2BKit.Unity.A2BEffectAsset
   Space: 2
   Payload:
-    rid: 3850508814762377222
+    rid: 3850508815041822726
   Feedbacks:
-  - rid: 3850508814762377223
-  - rid: 3850508814762377224
+  - rid: 3850508815041822727
+  - rid: 3850508815041822728
   SpaceOverride:
     rid: -2
   Definition:
     Duration: 1.15
     DurationJitter: 0.16
     Path:
-      rid: 3850508814762377225
+      rid: 3850508815041822729
     Easing:
-      rid: 3850508814762377226
+      rid: 3850508815041822730
     Emission:
-      rid: 3850508814762377227
+      rid: 3850508815041822731
     ScaleOverProgress:
       serializedVersion: 2
       m_Curve:
@@ -92,7 +92,7 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 3850508814762377222
+    - rid: 3850508815041822726
       type: {class: A2BImagePayloadRenderer, ns: A2BKit.Unity, asm: A2BKit.Unity}
       data:
         MaxPoolSize: 256
@@ -102,7 +102,7 @@ MonoBehaviour:
         Size: {x: 46, y: 46}
         PreserveAspect: 1
         RaycastTarget: 0
-    - rid: 3850508814762377223
+    - rid: 3850508815041822727
       type: {class: A2BSpawnPopFeedback, ns: A2BKit.Unity, asm: A2BKit.Unity}
       data:
         Enabled: 1
@@ -142,11 +142,11 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
         FadeIn: 1
-    - rid: 3850508814762377224
+    - rid: 3850508815041822728
       type: {class: A2BImpactFeedback, ns: A2BKit.Unity, asm: A2BKit.Unity}
       data:
         Enabled: 1
-        Prefab: {fileID: 4063551359731862214, guid: 258bf1f1fea7acb4da4b22764d39707e, type: 3}
+        Prefab: {fileID: 8530087233067194025, guid: 258bf1f1fea7acb4da4b22764d39707e, type: 3}
         Sprite: {fileID: 0}
         Color: {r: 1, g: 1, b: 1, a: 1}
         Size: 1
@@ -188,7 +188,7 @@ MonoBehaviour:
         UseUnscaledTime: 1
         MaxPoolSize: 128
         DefaultCapacity: 8
-    - rid: 3850508814762377225
+    - rid: 3850508815041822729
       type: {class: A2BBurstGatherPath, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         BurstRadius: 190
@@ -199,11 +199,11 @@ MonoBehaviour:
         BurstBias: {x: 0, y: 0.6, z: 0}
         BurstEase: 5
         GatherEase: 4
-    - rid: 3850508814762377226
+    - rid: 3850508815041822730
       type: {class: A2BStandardEasing, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         Kind: 0
-    - rid: 3850508814762377227
+    - rid: 3850508815041822731
       type: {class: A2BBurstEmission, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         MinCount: 20
