@@ -2,6 +2,21 @@
 
 All notable changes to A2BKit are documented here.
 
+## [0.1.1] — 2026-07-17
+
+### Changed
+
+- **Floating Score Text sample is now interactive.** Click the star and a "+N" pops off it, floats up
+  and fades — each click plays a fresh popup, tallied into a running score. Previously it auto-played
+  on a timer.
+
+### Added
+
+- **`A2BDemoClickToPlay`** (samples) — fires an `A2BEffectPlayer` when you click a target rect, or from
+  a `Button`'s `onClick`. Detects the click with no `EventSystem` (it hit-tests the pointer against the
+  rect and reads whichever input backend is active), so it never logs an input-backend mismatch on
+  scene open.
+
 ## [0.1.0] — 2026-07-17
 
 First release.

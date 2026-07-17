@@ -5,7 +5,8 @@
     "A2BKit.Core",
     "A2BKit.Unity",
     "UniTask",
-    "Unity.TextMeshPro"
+    "Unity.TextMeshPro",
+    "Unity.InputSystem"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

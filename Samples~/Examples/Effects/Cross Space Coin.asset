@@ -14,21 +14,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: A2BKit.Unity::A2BKit.Unity.A2BEffectAsset
   Space: 2
   Payload:
-    rid: 3850508811002970147
+    rid: 3850508814762377251
   Feedbacks:
-  - rid: 3850508811002970148
-  - rid: 3850508811002970149
+  - rid: 3850508814762377252
+  - rid: 3850508814762377253
   SpaceOverride:
     rid: -2
   Definition:
     Duration: 1
     DurationJitter: 0.18
     Path:
-      rid: 3850508811002970150
+      rid: 3850508814762377254
     Easing:
-      rid: 3850508811002970151
+      rid: 3850508814762377255
     Emission:
-      rid: 3850508811002970152
+      rid: 3850508814762377256
     ScaleOverProgress:
       serializedVersion: 2
       m_Curve:
@@ -92,7 +92,7 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 3850508811002970147
+    - rid: 3850508814762377251
       type: {class: A2BImagePayloadRenderer, ns: A2BKit.Unity, asm: A2BKit.Unity}
       data:
         MaxPoolSize: 256
@@ -102,7 +102,7 @@ MonoBehaviour:
         Size: {x: 48, y: 48}
         PreserveAspect: 1
         RaycastTarget: 0
-    - rid: 3850508811002970148
+    - rid: 3850508814762377252
       type: {class: A2BSpawnPopFeedback, ns: A2BKit.Unity, asm: A2BKit.Unity}
       data:
         Enabled: 1
@@ -142,11 +142,11 @@ MonoBehaviour:
           m_PostInfinity: 2
           m_RotationOrder: 4
         FadeIn: 1
-    - rid: 3850508811002970149
+    - rid: 3850508814762377253
       type: {class: A2BImpactFeedback, ns: A2BKit.Unity, asm: A2BKit.Unity}
       data:
         Enabled: 1
-        Prefab: {fileID: 253458777357778911, guid: 258bf1f1fea7acb4da4b22764d39707e, type: 3}
+        Prefab: {fileID: 4063551359731862214, guid: 258bf1f1fea7acb4da4b22764d39707e, type: 3}
         Sprite: {fileID: 0}
         Color: {r: 1, g: 1, b: 1, a: 1}
         Size: 1
@@ -188,18 +188,18 @@ MonoBehaviour:
         UseUnscaledTime: 1
         MaxPoolSize: 128
         DefaultCapacity: 8
-    - rid: 3850508811002970150
+    - rid: 3850508814762377254
       type: {class: A2BBezierPath, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         ArcHeight: 380
         ArcDirection: {x: 0, y: 1, z: 0}
         ArcBias: 0.5
         ArcJitter: 0.3
-    - rid: 3850508811002970151
+    - rid: 3850508814762377255
       type: {class: A2BStandardEasing, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         Kind: 6
-    - rid: 3850508811002970152
+    - rid: 3850508814762377256
       type: {class: A2BBurstEmission, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         MinCount: 14

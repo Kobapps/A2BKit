@@ -17,6 +17,7 @@ The only scripts here are small reactions you wire up yourself:
 | Script | Wire it to | What it does |
 | --- | --- | --- |
 | `A2BDemoAutoPlay` | — | Fires the player on a timer, so a scene is watchable with no input |
+| `A2BDemoClickToPlay` | — (or a Button's `onClick`) | Fires the player when you click a target rect. No EventSystem needed — it hit-tests the pointer directly and reads whichever input backend is active |
 | `A2BDemoCounter` | `OnFirstItemArrivedEvent` → `BeginRollUp`, `OnItemArrivedEvent` → `Increment` | The wallet number |
 | `A2BDemoPunch` | `OnItemArrivedEvent` → `Punch` | Kicks the wallet icon on each landing |
 | `A2BDemoXpBar` | `OnItemArrivedEvent` → `AddXp` | Fills a bar from arrivals |
@@ -28,7 +29,7 @@ The only scripts here are small reactions you wire up yourself:
 | --- | --- | --- |
 | 1 | Coin To Wallet | **The flagship.** Coins arc from a chest to the wallet HUD. `FirstItemArrived` starts the counter; each `ItemArrived` increments it and punches the icon. |
 | 2 | Coin Burst To Wallet | **The two-beat reward.** Coins explode *outward*, hang, then get pulled in — `A2BBurstGatherPath`. Not scene 1 with more scatter: scatter moves where a coin *starts*, so it never reverses. |
-| 3 | Floating Score Text | "+250" floats up and fades. The text is set on `A2BDemoAutoPlay`; the payload writes it through a reused StringBuilder. One item — a score popup is a single label, not a burst. |
+| 3 | Floating Score Text | **Click the star** and a "+N" pops off it, floats up and fades — each click plays a fresh popup, tallied into a running score. The text is passed as a value and the payload writes it through a reused StringBuilder. `A2BDemoClickToPlay` detects the click with no EventSystem. |
 | 4 | XP Orbs | Orbs stream into a bar that fills **on arrival**. A parallel timer would desync the moment anything staggered or got cancelled; the bar only knows what landed. |
 | 5 | Mesh Collect 3D | World3D, mesh payload, `AlignToVelocity`, with a trail. Trails work here and not on a Canvas — a `TrailRenderer` is a world-space mesh renderer. |
 | 6 | Particle Burst | Each item is a pooled `ParticleSystem`. It is still a CPU-side Transform, which is why `ItemArrived` still fires — GPU particles could not tell you when anything landed. |
