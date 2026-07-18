@@ -6,7 +6,8 @@
     "A2BKit.Unity",
     "UniTask",
     "Unity.TextMeshPro",
-    "Unity.InputSystem"
+    "Unity.InputSystem",
+    "A2BKit.UIParticles"
   ],
   "includePlatforms": [],
   "excludePlatforms": [],

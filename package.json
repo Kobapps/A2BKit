@@ -1,6 +1,6 @@
 {
   "name": "com.kobapps.a2bkit",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "displayName": "A2BKit",
   "description": "A-to-B reward and feedback effects: coins flying to a wallet HUD, floating score text, XP orbs. One configuration model across 2D, 3D and Canvas space, with zero per-frame allocation, live endpoint tracking, trails and on-hit impacts, UniTask async, and a first-class FirstItemArrived hook so the counter starts when the first coin actually lands.",
   "unity": "6000.0",

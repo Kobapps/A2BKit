@@ -46,17 +46,31 @@ bad config logs one actionable error and returns an invalid handle.
 
 ## Tune it visually — no play mode
 
-**Tools ▸ A2BKit ▸ A2B Effect Editor** opens a visual editor for one asset. Assign the asset, set
+**Tools ▸ A2BKit ▸ A2B Effect Editor** opens a UI Toolkit editor for one asset. Assign the asset, set
 Origin and Destination (a scene Transform, or a virtual point you drag with a Scene handle), then
 Play / Pause / Loop or drag the **Time** slider to scrub. Playback and scrub both run the real
 scheduler on the editor clock, so the frame you see is the frame the game shows. With **Show payload
 visuals** on (default) the actual sprite/image/mesh draws in both the Scene and the Game view with no
 play mode — it runs the shipping presenter on a throwaway `DontSave` stage; turn it off for lightweight
-motion dots. A Bezier path also gets a **draggable arc handle** in the Scene — grab the control point
-and `ArcHeight`/`ArcDirection`/`ArcBias` follow. A **spline path** (`A2BSplinePath`) gets a handle per
-control point, with **+**/**−** to add and remove points in the Scene. Edit the definition inline and it
-updates live. This is the fastest way to dial in Path, Easing, Emission stagger and scatter before
-wiring anything up.
+motion dots.
+
+The definition is laid out as collapsible **module panels**, like the Particle System inspector —
+Timing, Path, Emission, Scale over Life, Colour & Orientation, Payload, **Trail**, Feedbacks, Advanced.
+Every field edits the asset with Undo, and a change applies to the preview **live** — a paused frame
+re-simulates in place, a playing preview rebuilds when you release the control. The **Trail** panel
+draws a live silhouette of the streak (head→tail taper tinted by its gradient) above its fields.
+
+In the **Scene view**:
+- A Bézier path's arc control point is a full **3D move gizmo** (X/Y/Z) — drag it and
+  `ArcHeight`/`ArcDirection`/`ArcBias` follow.
+- A **spline path** (`A2BSplinePath`) shows a dot per control point; **click one to select** it and it
+  gets the 3D move gizmo, **＋** on a segment inserts a point (and selects it), **−** by the selected
+  point removes it.
+- The origin shows editable **scatter/burst radius** rings, and a row of dots previews the
+  **scale/colour envelope** along the path (each sized by `ScaleOverProgress`, tinted by
+  `ColorOverProgress`) so you read how an item grows and recolours without pressing Play.
+
+This is the fastest way to dial in Path, Easing, Emission and the trail before wiring anything up.
 
 For a multi-bend trajectory use **`A2BSplinePath`** — a Bézier over any number of control points, still
 pinned to both endpoints. Its offsets are fractions of the endpoint distance, so the same curve arcs
@@ -89,7 +103,10 @@ _coins ??= A2BEffectBuilder.Create()
     .Arc(height: 2f).Ease(A2BEaseKind.InOutCubic) // a visible lob
     .Duration(0.8f)
     .AsSpec(new A2BImagePayloadRenderer { Sprite = coinSprite }, A2BSpaceKind.Canvas)
-    .Feedback(new A2BTrailFeedback())             // world-space only — see gotchas
+    .Feedback(new A2BTrailFeedback {              // streak; over a canvas it bakes via A2BUIParticle
+        StartWidth = 14f, EndWidth = 0f,          // canvas trail widths are PIXELS, not world units
+        ClearMode = A2BTrailClearMode.Fade,       // how it leaves once its item lands (Fade/Scale/Immediate)
+        SoftGlow = true })                        // additive glow — overlapping comets read as one bright streak
     .Feedback(new A2BImpactFeedback { Prefab = sparkPrefab });
 
 A2B.Play(_coins, chest, walletIcon);
@@ -136,7 +153,7 @@ dispatch is not allocation-free — use `IA2BEffectListener` for the hot path).
 | Easing | `.Ease(A2BEaseKind.X)` — 21 kinds — or a custom `IA2BEasing` |
 | Emission | `.Count(n)` / `.Count(min,max)`, `.AllAtOnce()` / `.Stagger(interval)` / `.SpreadOver(seconds)`, `.Scatter(radius)`; shape the spread with `A2BBurstEmission.ReleaseEasing` |
 | Scale | `ScaleOverProgress` (curve over duration) × `ScaleFromPathDepth` (path Z, `× PathDepthScaleStrength`) × `ArcLiftScale` (grow off the chord) — all optional, they multiply |
-| Feedback | `A2BTrailFeedback`, `A2BImpactFeedback` (on-hit), `A2BSpawnPopFeedback`, `A2BAudioFeedback` |
+| Feedback | `A2BTrailFeedback` (streak; canvas-aware, `ClearMode` Fade/Scale/Immediate + `ClearDuration`, `SoftGlow`), `A2BImpactFeedback` (on-hit), `A2BSpawnPopFeedback`, `A2BAudioFeedback` |
 | Endpoints | pass a `Transform` (auto: `RectTransform`→UI), or an `IA2BEndpointProvider` for anything custom |
 
 ## Recipes
@@ -228,10 +245,24 @@ factory: `A2BAdapters.SetFactory(A2BSpaceKind.Canvas, myFactory)`, or per-asset 
 - **UniTask is required and installed separately.** A2BKit references it, but a package manifest can't
   declare a Git-package dependency — so if `Cysharp.Threading.Tasks` won't resolve, install UniTask
   first: `https://github.com/Cysharp/UniTask.git?path=src/UniTask/Assets/Plugins/UniTask`.
-- **Trails don't work on a Canvas, and no setting fixes it.** `TrailRenderer` is a world-space mesh
-  renderer; a screen-space Canvas won't draw one. Use trails in World2D/World3D. For a canvas impact,
-  set `A2BImpactFeedback.Prefab` to a uGUI object rather than using the `Sprite` fallback (which builds
-  a `SpriteRenderer`, same problem).
+- **Trails on a Canvas now just work** — `A2BTrailFeedback` detects a canvas root and bakes every trail
+  into one `CanvasRenderer` via `A2BUIParticle`, so a `TrailRenderer` (a world-space mesh renderer a
+  screen-space canvas can't draw on its own) shows over the UI, maskable and sortable, in one draw call.
+  On a canvas the trail is a **stable streak** — it does not age its tail *during* flight (which flickers
+  as points expire under a moving, decelerating item); it grows to the item, then **animates away on
+  arrival**. Two things to know on a canvas: trail **widths are in canvas pixels** (`StartWidth: 14`, not
+  `0.15`), and for a canvas **impact** set `A2BImpactFeedback.Prefab` to a uGUI object rather than the
+  `Sprite` fallback (which builds a `SpriteRenderer`, the same world-space problem).
+- **How a trail leaves once its item lands** is `A2BTrailFeedback.ClearMode`: `Fade` (dissolve opacity,
+  the default), `Scale` (shrink width to nothing), or `Immediate` (snap off). The animated modes run over
+  `ClearDuration` seconds (`0` = use the trail's `Time`). For a *glow* comet whose overlapping trails
+  should read as one bright streak rather than stacked hard-edged ribbons, set `SoftGlow = true` — it
+  bakes the canvas trail with a soft-edged additive material (order-independent, so overlaps never
+  flicker). `CornerVertices` / `CapVertices` round the ribbon's bends and ends if you want them smoother.
+- **Rendering particles/trails on a canvas directly?** Use `A2BUIParticle` — drop it on a UI object and
+  assign a `ParticleSystem` (its particles + trail module), or `Register(renderer)` any `TrailRenderer`
+  / `LineRenderer` / `ParticleSystemRenderer`. It bakes them into the CanvasRenderer each frame with no
+  extra camera or RenderTexture. It's what `A2BTrailFeedback` uses under the hood.
 - **Don't chain two effects for burst-then-gather.** Use `A2BBurstGatherPath` / `.BurstThenGather()`.
   Chaining means inventing an "arrival" for a coin that merely stopped, and losing `FirstItemArrived`.
 - **Don't mutate an asset's strategy at runtime.** `((A2BBurstEmission)asset.Definition.Emission).MinCount = 50`
@@ -246,5 +277,5 @@ factory: `A2BAdapters.SetFactory(A2BSpaceKind.Canvas, myFactory)`, or per-asset 
 
 - Package README — install + quick start.
 - `Documentation~/extending.md` — the full extension guide.
-- Package Manager ▸ A2BKit ▸ Samples ▸ **A2BKit Examples** — nine authored scenes; open one, press Play.
+- Package Manager ▸ A2BKit ▸ Samples ▸ **A2BKit Examples** — eleven authored scenes; open one, press Play.
 - **Tools ▸ A2BKit ▸ A2B Effect Editor** — preview and scrub an effect in the Scene, no play mode.

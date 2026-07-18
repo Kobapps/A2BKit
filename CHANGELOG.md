@@ -2,6 +2,103 @@
 
 All notable changes to A2BKit are documented here.
 
+## [0.3.0] — 2026-07-18
+
+### Added
+
+- **Particles and trails over a UI canvas — `A2BUIParticle`.** A `MaskableGraphic` that bakes world-space
+  `ParticleSystem`s (particles + their trail module), `TrailRenderer`s and `LineRenderer`s into its
+  `CanvasRenderer` every frame — so they render over a screen-space HUD, maskable and sortable, in one
+  draw call, with no extra Camera, RenderTexture or Canvas. Drop it on a UI object with a `ParticleSystem`,
+  or `Register()` any renderer. It bakes on `Canvas.willRenderCanvases` and reuses its meshes and buffers,
+  so it holds to the package's zero-per-frame-allocation rule. The bake is guarded to run once per frame
+  (not once per canvas-render pass) and the graphic's own geometry rebuild is suppressed, so the mesh does
+  not flicker when several views render the canvas. It lives in its **own assembly**
+  (`A2BKit.UIParticles`) with no dependency on the rest of A2BKit, so it can be lifted into a standalone
+  package unchanged.
+- **UI Particles sample (scene 10).** A glow behind a card and a confetti fountain in front, both rendered
+  on the canvas via `A2BUIParticle` — the standalone use of the module.
+- **UI Trails sample (scene 11).** The trails-over-UI headline: A2B comets streak from the chest to the
+  wallet leaving long bright tails drawn *on* the screen-space HUD, baked through `A2BUIParticle` by
+  `A2BTrailFeedback`. (Scene 1 also carries a subtler coin trail.)
+- **Trails now render over the UI automatically.** `A2BTrailFeedback` detects a Canvas root and routes
+  every trail through one `A2BUIParticle` baker — a coin flying across a HUD now leaves a streak, which a
+  raw world-space `TrailRenderer` could never draw on a screen-space canvas. On a canvas, trail widths are
+  in pixels. Baked trails are laid flat (`LineAlignment.TransformZ`) instead of billboarding each segment
+  to the bake camera — billboarding made a fast, curving trail's segments overlap as jittering fish-scale
+  chevrons, which was the trail flicker. The world-space `TrailRenderer` also has its own rendering turned
+  off (it still simulates for the bake), so the two copies never double up. The **Coin To Wallet** and
+  **UI Trails** samples show this.
+- **`A2BSampleCameraFit` (samples).** Keeps the 3D examples framed in any Game View aspect — portrait or
+  landscape — by moving the camera along its own forward axis to fit the content, so the Mesh Collect,
+  Particle Burst and Cross Space scenes no longer fall outside a narrow vertical field of view.
+- **Trail clear animation — `A2BTrailFeedback.ClearMode` + `ClearDuration`.** How a trail leaves once its
+  item lands: `Fade` (dissolve opacity, the default), `Scale` (shrink width to nothing), or `Immediate`
+  (snap off). The animated modes run over `ClearDuration` seconds (`0` = the trail's own `Time`). The
+  fade dims a reused gradient with no per-frame allocation.
+- **Soft additive glow for canvas trails — `A2BTrailFeedback.SoftGlow`.** Bakes the trail with a
+  soft-edged additive material so a comet effect's several trails, which bunch and overlap on their way to
+  one target, sum into one bright glow instead of stacking as hard-edged ribbons whose boundaries jump
+  frame to frame. `CornerVertices` / `CapVertices` round the ribbon's bends and ends.
+- **The A2B Effect Editor is now UI Toolkit.** The definition is a stack of collapsible **module panels**
+  — Timing, Path, Emission, Scale over Life, Colour & Orientation, Payload, Trail, Feedbacks, Advanced —
+  like the Particle System inspector, driven by a bound `SerializedObject` so the subclass-selector,
+  curve and gradient drawers and Undo are the native ones. Retained-mode, so the per-frame IMGUI layout is
+  gone. Edits apply to the preview **live**: a paused frame re-simulates in place; a playing preview
+  rebuilds when the control is released.
+- **Trail panel with a live silhouette.** The Trail module draws the streak's head→tail taper, tinted by
+  its gradient, above its fields — tune the look by eye.
+- **3D move gizmo on path control points.** The selected spline control point (and the Bézier arc point)
+  shows a full X/Y/Z move handle like a Transform; other spline points are click-to-select dots, with
+  **＋** to insert a point on a segment and **−** to remove the selected one.
+- **Scale / colour envelope preview in the Scene.** A row of dots along the path, each sized by
+  `ScaleOverProgress` and tinted by `ColorOverProgress`, shows how an item grows and recolours in flight
+  without pressing Play.
+
+### Fixed
+
+- **Samples: missing materials on the 3D and particle examples** (was 0.2.1). The generated coin mesh and
+  materials were `HideFlags.DontSave`, so they dropped out of the scenes/assets that referenced them and
+  rendered magenta. They are now baked to real assets under `Art/Generated/`.
+- **Canvas trail flicker in flight — the real fix.** A baked canvas trail no longer ages its tail *during*
+  flight: as an item decelerates near its target, time-based point expiry made the ribbon shrink and
+  re-taper every frame (and the `TrailRenderer`'s own tail-vertex interpolation flipped the tip between a
+  point and a flat edge). The trail is now a stable streak that only grows to the item and then animates
+  away on arrival, and its head stays glued to the item — so the shape is steady frame to frame.
+- **Editor crash when clicking a module panel or dragging a path handle.** The window was IMGUI, where a
+  panel click toggles a foldout and mutates layout mid-event; and a global rename had left `AfterEdit`
+  calling itself, so any edit (including a handle drag) recursed to a stack-overflow crash. The UI Toolkit
+  rewrite removes the IMGUI layout entirely, and the recursion is fixed. Handle drags also defer the
+  re-simulation to mouse-release, so dragging a path no longer stalls.
+- **Spline control points were not draggable in the Scene.** Selecting a point only repainted the window,
+  not the Scene view, so its 3D gizmo never appeared. Selection now repaints the Scene and the first point
+  is auto-selected, so there is always a live gizmo to grab.
+- **`NullReferenceException` from the trail fade clear.** The reused fade-gradient buffers could be a
+  half-built clone from `CreateRuntimeInstance`; they are now reset per instance and fully guarded.
+- **Duplicated "Path → Path" module sections.** A single `[SerializeReference]` property (Path, Emission,
+  Payload) whose drawer already shows a named foldout is no longer wrapped in a second module of the same
+  name.
+
+## [0.2.1] — 2026-07-18
+
+### Added
+
+- **In-session example navigator.** Press Play in any sample and a slim **A2BKit Examples** bar appears
+  along the bottom — Prev / Next and the current example, with a click to open the full list — to hop
+  straight between scenes without leaving Play mode. It bootstraps itself (no wiring in the sample
+  scenes) and only ever appears in the example scenes, so importing the samples never injects the menu
+  into a consumer's own game. In the Editor it registers the example scenes in Build Settings on first
+  switch (also **Tools ▸ A2BKit ▸ Samples ▸ Add Example Scenes to Build Settings**).
+
+### Fixed
+
+- **Samples: missing materials on the 3D and particle examples.** The generated coin mesh and the unlit
+  and particle materials were created `HideFlags.DontSave`, so they were dropped from the scenes and
+  effect assets that referenced them — the chest, collector and 3D/particle coins rendered as Unity's
+  magenta error material (or not at all). They are now baked to real assets under
+  `Art/Generated/`, so the references persist. (The 2D examples were unaffected — they reference real
+  PNG sprites.)
+
 ## [0.2.0] — 2026-07-18
 
 ### Added

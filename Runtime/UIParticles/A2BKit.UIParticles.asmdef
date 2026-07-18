@@ -1,0 +1,14 @@
+{
+  "name": "A2BKit.UIParticles",
+  "rootNamespace": "A2BKit.UIParticles",
+  "references": [],
+  "includePlatforms": [],
+  "excludePlatforms": [],
+  "allowUnsafeCode": false,
+  "overrideReferences": false,
+  "precompiledReferences": [],
+  "autoReferenced": true,
+  "defineConstraints": [],
+  "versionDefines": [],
+  "noEngineReferences": false
+}

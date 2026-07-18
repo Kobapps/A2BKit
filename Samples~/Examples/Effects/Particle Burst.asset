@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: A2BKit.Unity::A2BKit.Unity.A2BEffectAsset
   Space: 0
   Payload:
-    rid: 3850508815041822746
+    rid: 3850508827755807071
   Feedbacks: []
   SpaceOverride:
     rid: -2
@@ -22,11 +22,11 @@ MonoBehaviour:
     Duration: 1.1
     DurationJitter: 0.2
     Path:
-      rid: 3850508815041822747
+      rid: 3850508827755807072
     Easing:
-      rid: 3850508815041822748
+      rid: 3850508827755807073
     Emission:
-      rid: 3850508815041822749
+      rid: 3850508827755807074
     ScaleOverProgress:
       serializedVersion: 2
       m_Curve:
@@ -51,6 +51,9 @@ MonoBehaviour:
       m_PreInfinity: 2
       m_PostInfinity: 2
       m_RotationOrder: 4
+    ScaleFromPathDepth: 0
+    PathDepthScaleStrength: 1
+    ArcLiftScale: 0
     ColorOverProgress:
       serializedVersion: 2
       key0: {r: 1, g: 1, b: 1, a: 1}
@@ -90,25 +93,25 @@ MonoBehaviour:
     RefIds:
     - rid: -2
       type: {class: , ns: , asm: }
-    - rid: 3850508815041822746
+    - rid: 3850508827755807071
       type: {class: A2BParticlePayloadRenderer, ns: A2BKit.Unity, asm: A2BKit.Unity}
       data:
         MaxPoolSize: 256
         DefaultCapacity: 16
-        ParticlePrefab: {fileID: 7245638386413008841, guid: 43f0cf28d32753e489915da0472e7bba, type: 3}
+        ParticlePrefab: {fileID: 2396361856594191, guid: 43f0cf28d32753e489915da0472e7bba, type: 3}
         TintStartColor: 1
-    - rid: 3850508815041822747
+    - rid: 3850508827755807072
       type: {class: A2BBezierPath, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         ArcHeight: 2
         ArcDirection: {x: 0, y: 1, z: 0}
         ArcBias: 0.5
         ArcJitter: 0.3
-    - rid: 3850508815041822748
+    - rid: 3850508827755807073
       type: {class: A2BStandardEasing, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         Kind: 6
-    - rid: 3850508815041822749
+    - rid: 3850508827755807074
       type: {class: A2BBurstEmission, ns: A2BKit.Core, asm: A2BKit.Core}
       data:
         MinCount: 8
@@ -116,6 +119,8 @@ MonoBehaviour:
         ReleaseMode: 1
         StaggerInterval: 0.06
         SpreadDuration: 0.4
+        ReleaseEasing:
+          rid: -2
         DelayJitter: 0
         _scatterRadius: 0.5
         ScatterAxisWeights: {x: 1, y: 1, z: 1}

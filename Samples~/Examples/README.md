@@ -1,9 +1,19 @@
 # A2BKit Examples
 
-Nine scenes. Open one, press Play.
+Eleven scenes. Open one, press Play.
 
 Install them through **Package Manager → A2BKit → Samples → A2BKit Examples → Import**, then open a
 scene from `Assets/Samples/A2BKit/<version>/A2BKit Examples/Scenes/`.
+
+## Hop between examples in one session
+
+Press Play in any example and a small **A2BKit Examples** panel appears top-left with a button per
+scene plus Prev/Next — click to jump straight to another example without leaving Play mode. It sets
+itself up (no wiring in the scenes) and only ever shows in these sample scenes, never in your own game.
+
+Runtime scene switching needs the scenes in Build Settings; the panel adds them the first time you
+switch in the Editor, or run **Tools ▸ A2BKit ▸ Samples ▸ Add Example Scenes to Build Settings** once.
+A standalone build must include them like any other scene.
 
 ## They are scenes, not scripts
 
@@ -37,6 +47,8 @@ The only scripts here are small reactions you wire up yourself:
 | 7 | Moving Target | The wallet slides across the screen **while coins are in flight**, and they still land on it. The only code doing that is `A2BDemoOscillate`: endpoints resolve every frame and are never cached at play time. |
 | 8 | Cross Space | A 3D chest, a UI wallet. Origin is a plain world Transform; the effect plays in Canvas space and the adapter projects it. No camera math at the call site. |
 | 9 | Multiple Effects | **Two effects at once, to different places.** One reward sends coins to the wallet HUD *and* xp orbs to the level bar. They run concurrently and never disturb each other — one scheduler advances every effect, and each has its own pool. Guarded by `A2BConcurrentEffectsTests`. |
+| 10 | UI Particles | **Particles on a screen-space canvas.** `A2BUIParticle` bakes a world-space `ParticleSystem` into a `CanvasRenderer` — a glow behind a card, a confetti fountain in front, sortable and maskable like any UI element, in one draw call and no extra camera. The standalone, A2B-independent use of the UI-particle module. |
+| 11 | UI Trails | **A2B effects with trails over a Canvas.** Comets streak from the chest to the wallet leaving long bright tails *on the HUD*. A `TrailRenderer` is world-space and can't draw on a screen-space canvas — `A2BTrailFeedback` detects the canvas and bakes every trail into one `CanvasRenderer` via `A2BUIParticle`. Sortable, one draw call. |
 
 ## The art
 

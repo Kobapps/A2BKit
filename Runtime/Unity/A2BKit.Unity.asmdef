@@ -3,6 +3,7 @@
   "rootNamespace": "A2BKit.Unity",
   "references": [
     "A2BKit.Core",
+    "A2BKit.UIParticles",
     "UniTask",
     "Unity.TextMeshPro"
   ],
