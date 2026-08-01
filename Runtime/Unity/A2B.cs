@@ -156,11 +156,12 @@ namespace A2BKit.Unity
         private static Transform NewRoot(string rootName)
         {
             var go = new GameObject(rootName);
-            go.hideFlags = HideFlags.DontSave;
 
             // Guarded: DontDestroyOnLoad throws outside play mode (see A2BRunner) — an editor tool
-            // calling A2B.Play() must not blow up on scaffolding.
+            // calling A2B.Play() must not blow up on scaffolding. DontSave is the edit-mode half only:
+            // in play mode it would keep the root alive past the session (see A2BCanvasPool).
             if (Application.isPlaying) Object.DontDestroyOnLoad(go);
+            else go.hideFlags = HideFlags.DontSave;
 
             return go.transform;
         }

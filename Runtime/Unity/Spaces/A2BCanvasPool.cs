@@ -32,11 +32,17 @@ namespace A2BKit.Unity
 
             var go = new GameObject("[A2BKit Canvas]", typeof(RectTransform), typeof(Canvas));
 
-            // DontSave for the same reason every other A2BKit-created root carries it: at runtime it is
-            // harmless, and in an edit-mode preview (FR-21) it keeps this scaffolding out of the user's
-            // scene file. Without it, an editor tool that builds a Canvas adapter would leave a stray
-            // "[A2BKit Canvas]" behind to be saved.
-            go.hideFlags = HideFlags.DontSave;
+            // DontSave OUTSIDE play mode only. In an edit-mode preview (FR-21) it keeps this scaffolding
+            // out of the user's scene file — without it, an editor tool that builds a Canvas adapter
+            // would leave a stray "[A2BKit Canvas]" behind to be saved.
+            //
+            // In play mode it is the opposite of harmless. DontSave also means "not destroyed when a new
+            // scene is loaded", and leaving play mode IS a scene reload: the canvas, its "<Payload> Pool"
+            // child and every pooled item under it survive into edit mode belonging to no loaded scene.
+            // They keep rendering and never appear in the Hierarchy, so they cannot be selected or
+            // deleted — the stuck "A2B Text Item" between plays. A plain scene object is what runtime
+            // wants anyway: it dies with the scene whose canvas it was built for.
+            if (!Application.isPlaying) go.hideFlags = HideFlags.DontSave;
 
             var rect = (RectTransform)go.transform;
             var canvas = go.GetComponent<Canvas>();

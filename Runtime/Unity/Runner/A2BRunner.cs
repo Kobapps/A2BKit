@@ -36,9 +36,13 @@ namespace A2BKit.Unity
                 // edit-time use — an editor tool, a preview, a batch-mode capture — explode on the
                 // first Play(): a plain AD-8 violation. Outside play mode there is no scene load to
                 // survive anyway, so the guard costs nothing.
+                // DontSave is for the edit-mode case only. In play mode DontDestroyOnLoad already
+                // provides the persistence, and DontSave on top of it means the runner is not destroyed
+                // when the editor tears the play-mode scenes down either — it survives into edit mode
+                // outside any scene, invisible in the Hierarchy and impossible to remove (NFR-5).
                 if (Application.isPlaying) DontDestroyOnLoad(go);
+                else go.hideFlags = HideFlags.DontSave;
 
-                go.hideFlags = HideFlags.DontSave;
                 return _instance;
             }
         }

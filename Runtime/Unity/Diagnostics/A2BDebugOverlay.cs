@@ -52,8 +52,8 @@ namespace A2BKit.Unity
             }
 
             var go = new GameObject("[A2BKit Debug Overlay]");
-            if (Application.isPlaying) DontDestroyOnLoad(go);   // throws in edit mode
-            go.hideFlags = HideFlags.DontSave;
+            if (Application.isPlaying) DontDestroyOnLoad(go);        // throws in edit mode
+            else go.hideFlags = HideFlags.DontSave;                  // DontSave would outlive play mode
             _instance = go.AddComponent<A2BDebugOverlay>();
             return _instance;
         }

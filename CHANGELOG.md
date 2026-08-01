@@ -2,6 +2,28 @@
 
 All notable changes to A2BKit are documented here.
 
+## [0.3.1] — 2026-08-01
+
+### Fixed
+
+- **Items no longer survive play mode as unselectable ghosts.** Leaving play mode left `A2B Text Item`s
+  (and every other pooled payload) visible in the Scene and Game views, absent from the Hierarchy, and
+  impossible to select or delete — they piled up between plays until the editor was restarted. Cause: the
+  roots the package creates carried `HideFlags.DontSave`, which by Unity's definition also means "not
+  destroyed when a new scene is loaded" — and leaving play mode *is* a scene reload. `[A2BKit Canvas]`,
+  `[A2BKit Runner]`, the world roots and the debug overlay outlived the session and dragged their pools
+  and items with them. Those roots now carry `DontSave` only outside play mode, where it exists to keep
+  edit-mode preview scaffolding out of the user's scene file; in play mode `DontDestroyOnLoad` already
+  provides the persistence that is actually wanted, and the objects die with the session. Same fix removes
+  a matching runtime leak: a dedicated canvas no longer outlives the scene whose canvas it was built for,
+  so loading scenes in a build stops accumulating stray `[A2BKit Canvas]` objects.
+- **Stray leftovers are swept automatically, and on demand.** Entering edit mode now destroys any A2BKit
+  root that outlived a play session, and **Tools ▸ A2BKit ▸ Clean Up Stray Objects** does the same by
+  hand — the way to clear objects a pre-fix session already stranded, which otherwise only an editor
+  restart removes. The match is narrow: parentless objects whose name carries the package's `[A2B` root
+  prefix, and which are either scene-less or flagged `DontSaveInEditor`. A user's own GameObject named
+  `[A2B ...]`, sitting in a real scene with no hide flags, is never touched, and assets are excluded.
+
 ## [0.3.0] — 2026-07-18
 
 ### Added

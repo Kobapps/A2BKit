@@ -63,6 +63,16 @@ namespace A2BKit.Editor
         private static bool ValidateStopEffectPreview() => A2BEffectPreview.IsPlaying;
 
         /// <summary>
+        /// Removes A2BKit scaffolding stranded by a play session — items visible in the Scene and Game
+        /// views that the Hierarchy does not list, so they cannot be selected or deleted by hand (see
+        /// <see cref="A2BStrayObjectCleanup"/>). This now runs automatically on leaving play mode; the
+        /// menu item is the manual door for objects a pre-fix session already stranded, which otherwise
+        /// only an editor restart clears.
+        /// </summary>
+        [MenuItem("Tools/A2BKit/Clean Up Stray Objects", false, 22)]
+        private static void CleanUpStrayObjects() => A2BStrayObjectCleanup.Sweep(reportEmpty: true);
+
+        /// <summary>
         /// Installs the AI skill (see <see cref="A2BSkillInstaller"/>). Also a button in the window;
         /// the menu item is here so it is findable without opening the window first.
         /// </summary>

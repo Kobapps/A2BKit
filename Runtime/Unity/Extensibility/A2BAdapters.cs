@@ -149,10 +149,13 @@ namespace A2BKit.Unity
             if (context.RootOverride != null) return context.RootOverride;
 
             var go = new GameObject(rootName);
-            go.hideFlags = HideFlags.DontSave;
 
             // Guarded: DontDestroyOnLoad throws outside play mode, and editor tooling builds adapters too.
+            // DontSave is the edit-mode half of the same choice — and only the edit-mode half. Carrying
+            // it in play mode would exempt this root (and every pooled item under it) from the teardown
+            // that ends a play session, leaking them into the editor outside any scene.
             if (Application.isPlaying) UnityEngine.Object.DontDestroyOnLoad(go);
+            else go.hideFlags = HideFlags.DontSave;
 
             return go.transform;
         }
