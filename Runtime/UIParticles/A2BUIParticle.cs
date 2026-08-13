@@ -13,9 +13,14 @@ namespace A2BKit.UIParticles
     ///
     /// How: every source exposes a Bake API (<c>TrailRenderer.BakeMesh</c>, <c>LineRenderer.BakeMesh</c>,
     /// <c>ParticleSystemRenderer.BakeMesh</c>/<c>BakeTrailsMesh</c>) that snapshots its current geometry
-    /// into a Mesh. We bake each registered source, transform it into this graphic's local space, combine
-    /// the lot into ONE mesh, and hand it to our <see cref="CanvasRenderer"/> — one draw call for the
-    /// whole set, drawn in canvas order like any other UI element.
+    /// into a Mesh. We bake each registered source, lift it out of its own simulation space (see
+    /// <see cref="SimulationToWorld"/>) into this graphic's local space, combine the lot into ONE mesh, and
+    /// hand it to our <see cref="CanvasRenderer"/> — one draw call for the whole set, drawn in canvas order
+    /// like any other UI element.
+    ///
+    /// Any simulation space works. LOCAL space is the one to reach for when the effect decorates a UI
+    /// element that MOVES — a cell in a scroll view, a card sliding in — because the particles then travel
+    /// with it for free; world space leaves already-emitted particles behind in mid-air.
     ///
     /// Allocation discipline: the bake runs every frame, so it reuses everything — one worker mesh, a
     /// grown-once pool of per-source bake meshes, and shared scratch lists. Baking on
@@ -162,8 +167,10 @@ namespace A2BKit.UIParticles
                 dst.Clear(false);
                 if (!BakeSource(src, cam, dst) || dst.vertexCount == 0) continue;
 
-                // Bakes are in WORLD space (useTransform:false), so one world→local matrix places them all.
-                s_Combine.Add(new CombineInstance { mesh = dst, transform = worldToLocal });
+                // A bake is in its source's own SIMULATION space, which is world space for most sources but
+                // not all — see SimulationToWorld. Lift it to world first, then into this graphic's local
+                // space with the shared matrix.
+                s_Combine.Add(new CombineInstance { mesh = dst, transform = worldToLocal * SimulationToWorld(src) });
             }
 
             if (s_Combine.Count == 0)
@@ -184,7 +191,58 @@ namespace A2BKit.UIParticles
             canvasRenderer.SetMesh(_worker);
         }
 
-        /// <summary>Snapshots one source's current geometry into <paramref name="dst"/> (world space).</summary>
+        /// <summary>
+        /// The matrix that lifts one source's baked geometry into WORLD space. Identity for the common case
+        /// — a world-simulated particle system, or a line already in world space — and that is why this went
+        /// unnoticed for so long.
+        ///
+        /// ⚠️ It is NOT identity for a particle system simulating in LOCAL (or Custom) space. Unity bakes
+        /// such a system in its simulation space, and <see cref="ParticleSystemBakeMeshOptions.BakeRotationAndScale"/>
+        /// folds in the transform's rotation and scale but NOT its position — verified exactly, to the float:
+        /// baked + transform.position reproduces the simulated world positions. So the missing piece is the
+        /// translation alone; applying a full localToWorld here would double-apply rotation and scale.
+        ///
+        /// Without this, a local-space system's particles were shifted by the graphic's entire world offset
+        /// (hundreds of screen units) and simply vanished — which made local space, the natural way to author
+        /// an effect that must travel with a moving UI element, unusable.
+        ///
+        /// A CUSTOM-space system is carried by its custom transform's position on the same reasoning. Its
+        /// rotation and scale are not honoured: the bake applied the SYSTEM's, and there is no way to undo
+        /// that here. Custom space is exact only while the two agree, which is the normal UI case.
+        ///
+        /// A LineRenderer is different in kind: it is baked with <c>useTransform:false</c>, so nothing at all
+        /// was applied and a local-space line needs the whole localToWorld. A TrailRenderer is always world.
+        /// </summary>
+        private static Matrix4x4 SimulationToWorld(Src src)
+        {
+            switch (src.Renderer)
+            {
+                case ParticleSystemRenderer psr:
+                    var system = psr.GetComponent<ParticleSystem>();
+                    if (system == null) return Matrix4x4.identity;
+                    ParticleSystem.MainModule main = system.main;
+                    switch (main.simulationSpace)
+                    {
+                        case ParticleSystemSimulationSpace.Local:
+                            return Matrix4x4.Translate(system.transform.position);
+                        case ParticleSystemSimulationSpace.Custom:
+                            Transform custom = main.customSimulationSpace;
+                            return Matrix4x4.Translate(custom != null
+                                ? custom.position
+                                : system.transform.position);
+                        default:
+                            return Matrix4x4.identity;
+                    }
+                case LineRenderer line:
+                    return line.useWorldSpace
+                        ? Matrix4x4.identity
+                        : line.transform.localToWorldMatrix;
+                default:
+                    return Matrix4x4.identity;
+            }
+        }
+
+        /// <summary>Snapshots one source's current geometry into <paramref name="dst"/> (its simulation space).</summary>
         private static bool BakeSource(Src src, Camera cam, Mesh dst)
         {
             switch (src.Renderer)

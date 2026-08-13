@@ -2,6 +2,28 @@
 
 All notable changes to A2BKit are documented here.
 
+## [0.3.2] — 2026-08-13
+
+### Fixed
+
+- **`A2BUIParticle` draws local-space particle systems instead of losing them.** A system set to Local (or
+  Custom) simulation space vanished: nothing rendered, no warning, no error. Cause: the bake was assumed to
+  come back in world space, so one `worldToLocalMatrix` placed every source. That holds for a world-space
+  system, and only for one — Unity bakes a system in its own SIMULATION space, and
+  `ParticleSystemBakeMeshOptions.BakeRotationAndScale` folds in the transform's rotation and scale but not
+  its position. A local-space system therefore baked local coordinates that were then shifted by the
+  graphic's entire world offset — hundreds of screen units — and left the visible area. Each source is now
+  lifted out of its own simulation space first: identity for a world-space system (so every existing effect
+  bakes byte-for-byte as before), the transform's position for a local-space one, the custom transform's
+  position for Custom, and the full `localToWorld` for a `LineRenderer` in local space, which is baked with
+  `useTransform:false` and so has had nothing applied at all.
+
+  This matters beyond the missing pixels: **local space is the correct way to author an effect on a UI
+  element that MOVES** — a cell in a scroll view, a card sliding in — because the particles then travel with
+  it for free. World space leaves already-emitted particles behind in mid-air, which is the bug this was
+  found through. Custom space is exact while the custom transform's rotation and scale agree with the
+  system's; the bake applied the system's, and that cannot be undone here.
+
 ## [0.3.1] — 2026-08-01
 
 ### Fixed
